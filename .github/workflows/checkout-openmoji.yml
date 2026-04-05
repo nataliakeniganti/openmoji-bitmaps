@@ -1,0 +1,38 @@
+# Based on https://stackoverflow.com/a/58468828
+
+name: Check OpenMoji release
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  release_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout openmoji-release.txt file
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSH_KEY }}
+          ref: refs/heads/main
+          sparse-checkout: openmoji-release.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Fetch OpenMoji latest release version
+        run: |
+          curl -s -L 'https://api.github.com/repos/hfg-gmuend/openmoji/releases/latest' | \
+          jq -r '.tag_name' > openmoji-release.txt
+
+      - name: Check if it is a new release
+        id: git-check
+        run: echo modified=$([ -z "`git status --porcelain`" ] && echo "false" || echo "true") >> $GITHUB_OUTPUT
+        
+      - name: Commit latest release version
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add openmoji-release.txt
+          git commit -m "Update openmoji-release.txt ($(cat openmoji-release.txt))"
+          git push
