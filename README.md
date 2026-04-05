@@ -1,6 +1,7 @@
 # Bitmap renders of OpenMoji
 
-Automated renders of [OpenMoji](https://github.com/hfg-gmuend/openmoji) SVG sources using GitHub Actions.
+Automated render of [OpenMoji](https://github.com/hfg-gmuend/openmoji) SVG sources as PNG images, powered by GitHub Actions. \
+OpenMoji repository is checked for a new release every day at 11:00 UTC.
 
 ## Available renders
 ### Downloads
@@ -33,5 +34,5 @@ Sources are the `color/svg` directory taken from latest release tag of the `mast
 
 ## Licensing
 
-OpenMoji graphics are licensed under [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). \
+OpenMoji graphics are licensed under [Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). \
 Refer to https://github.com/hfg-gmuend/openmoji for more information about authors.
