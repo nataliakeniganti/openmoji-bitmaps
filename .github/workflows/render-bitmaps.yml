@@ -8,6 +8,9 @@ on:
       - openmoji-release.txt
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   convert_svg:
     runs-on: ubuntu-latest
@@ -19,13 +22,15 @@ jobs:
           ref: refs/heads/master
           path: repo
 
-      - run: echo "OPENMOJI-RELEASE=$(cat repo/openmoji-release.txt)" >> $GITHUB_ENV
+      - name: Read version
+        # Trims whitespace/newlines and avoids hyphens in variable names
+        run: echo "OPENMOJI_VERSION=$(cat repo/openmoji-release.txt | xargs)" >> $GITHUB_ENV
 
       - name: Checkout OpenMoji repo
         uses: actions/checkout@v4
         with:
           repository: hfg-gmuend/openmoji
-          ref: refs/tags/${{ env.OPENMOJI-RELEASE }}
+          ref: refs/tags/${{ env.OPENMOJI_VERSION }}
           path: openmoji
           sparse-checkout: color/svg
 
@@ -45,22 +50,32 @@ jobs:
           source_dir: ${{ steps.conv-128x128.outputs.png_dir }}
           output_dir: repo/128x128_png8
 
-      - name: Commit
+      - name: Commit and Tag
         working-directory: repo
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -am "Generate OpenMoji ${{ env.OPENMOJI-RELEASE }}"
-          git tag -f "${{ env.OPENMOJI-RELEASE }}"
-          git push origin
-          git push --force origin "refs/tags/${{ env.OPENMOJI-RELEASE }}":"refs/tags/${{ env.OPENMOJI-RELEASE }}"
+          git commit -am "Generate OpenMoji ${{ env.OPENMOJI_VERSION }}" || echo "No changes to commit"
+          git tag -f "${{ env.OPENMOJI_VERSION }}"
+          git push origin master
+          git push --force origin "refs/tags/${{ env.OPENMOJI_VERSION }}"
 
       - name: Create a release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          7z a -tzip "128x128_PNG32.zip" "./${{ steps.conv-128x128.outputs.png_dir }}/*"
-          7z a -tzip "128x128_PNG8.zip" "./repo/128x128_png8/*"
-          gh release delete "${{ env.OPENMOJI-RELEASE }}" -y --repo "$GITHUB_REPOSITORY" || true
-          gh release create "${{ env.OPENMOJI-RELEASE }}" "128x128_PNG32.zip#128x128 PNG32" "128x128_PNG8.zip#128x128 PNG8" --repo "$GITHUB_REPOSITORY" --title "OpenMoji ${{ env.OPENMOJI-RELEASE }}" --notes "Release notes: https://github.com/hfg-gmuend/openmoji/releases/tag/${{ env.OPENMOJI-RELEASE }}"
+          # Use 7z on the directory context to avoid shell argument limits
+          7z a -tzip "128x128_PNG32.zip" "./${{ steps.conv-128x128.outputs.png_dir }}/"
+          7z a -tzip "128x128_PNG8.zip" "./repo/128x128_png8/"
+          
+          # Delete existing release if it exists
+          gh release delete "${{ env.OPENMOJI_VERSION }}" -y --repo "$GITHUB_REPOSITORY" || true
+          
+          # Create new release with assets
+          gh release create "${{ env.OPENMOJI_VERSION }}" \
+            "128x128_PNG32.zip#128x128 PNG32" \
+            "128x128_PNG8.zip#128x128 PNG8" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "OpenMoji ${{ env.OPENMOJI_VERSION }}" \
+            --notes "Release notes: https://github.com/hfg-gmuend/openmoji/releases/tag/${{ env.OPENMOJI_VERSION }}"
