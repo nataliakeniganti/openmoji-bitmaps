@@ -1,6 +1,6 @@
 # Bitmap renders of OpenMoji
 
-Automatic renders of [OpenMoji](https://github.com/hfg-gmuend/openmoji) SVG sources using GitHub Actions.
+Automated renders of [OpenMoji](https://github.com/hfg-gmuend/openmoji) SVG sources using GitHub Actions.
 
 ## Available renders
 ### Downloads
