@@ -3,7 +3,7 @@ name: Render bitmaps
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - openmoji-release.txt
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.SSH_KEY }}
-          ref: refs/heads/main
+          ref: refs/heads/master
           path: repo
 
       - run: echo "OPENMOJI-RELEASE=$(cat repo/openmoji-release.txt)" >> $GITHUB_ENV
