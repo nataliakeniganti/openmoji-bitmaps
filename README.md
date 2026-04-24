@@ -1,7 +1,7 @@
 # Bitmap renders of OpenMoji
 
 Automated render of [OpenMoji](https://github.com/hfg-gmuend/openmoji) SVG sources as PNG images, powered by GitHub Actions. \
-OpenMoji repository is checked for a new release every day at 11:00 UTC.
+OpenMoji repository is checked for a new release every day.
 
 ## Available renders
 ### Downloads
